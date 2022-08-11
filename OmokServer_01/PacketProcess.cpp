@@ -91,23 +91,13 @@ ERROR_CODE PacketProcess::Login(PacketInfo packetInfo)
 
 	// 에러체크 : 받은 데이터의 크기 확인
 	if (sizeof(*reqPkt) != sizeof(PktLogInReq))
-	{
-		resPkt.SetError(ERROR_CODE::UNASSIGNED_ERROR);
-		m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::LOGIN_IN_RES, sizeof(PktLogInRes), (char*)&resPkt);
-		return ERROR_CODE::UNASSIGNED_ERROR;
-	}
+		return (SendError(packetInfo, resPkt, ERROR_CODE::UNASSIGNED_ERROR, PACKET_ID::LOGIN_IN_RES));
 
 	auto addRet = m_pRefUserMgr->AddUser(packetInfo.SessionIndex, reqPkt->szID);
 	if (addRet != ERROR_CODE::NONE)
-	{
-		resPkt.SetError(addRet);
-		m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::LOGIN_IN_RES, sizeof(PktLogInRes), (char*)&resPkt);
-		return addRet;
-	}
-		
-	resPkt.SetError(addRet);
-	m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::LOGIN_IN_RES, sizeof(PktLogInRes), (char*)&resPkt);
-	return ERROR_CODE::NONE;
+		return (SendError(packetInfo, resPkt, addRet, PACKET_ID::LOGIN_IN_RES));
+	
+	return (SendError(packetInfo, resPkt, ERROR_CODE::NONE, PACKET_ID::LOGIN_IN_RES));
 }
 
 ERROR_CODE PacketProcess::EnterRoom(PacketInfo packetInfo)
@@ -117,28 +107,16 @@ ERROR_CODE PacketProcess::EnterRoom(PacketInfo packetInfo)
 	PktRoomEnterRes resPkt;
 	auto reqPkt = (PktRoomEnterReq*)packetInfo.pRefData;
 	if (sizeof(*reqPkt) != sizeof(PktRoomEnterReq))
-	{
-		resPkt.SetError(ERROR_CODE::UNASSIGNED_ERROR);
-		m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_ENTER_RES, sizeof(PktRoomEnterRes), (char*)&resPkt);
-		return ERROR_CODE::UNASSIGNED_ERROR;
-	}
+		return (SendError(packetInfo, resPkt, ERROR_CODE::UNASSIGNED_ERROR, PACKET_ID::ROOM_ENTER_RES));
 
 	// 에러체크 : 유저가 이미 방에 들어가있는지 확인
 	auto pUser = std::get<1>(m_pRefUserMgr->GetUser(packetInfo.SessionIndex));
 	if (pUser->GetRoomIndex() > -1)
-	{
-		resPkt.SetError(ERROR_CODE::USER_MGR_ALREADY_IN_ROOM);
-		m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_ENTER_RES, sizeof(PktRoomEnterRes), (char*)&resPkt);
-		return ERROR_CODE::USER_MGR_ALREADY_IN_ROOM;
-	}
+		return (SendError(packetInfo, resPkt, ERROR_CODE::USER_MGR_ALREADY_IN_ROOM, PACKET_ID::ROOM_ENTER_RES));
 	
 	// 에러체크: 방 번호가 서버가 생성한 방번호 보다 큰지 확인
 	if (reqPkt->RoomIndex >= m_pConfig->MaxRoomCount)
-	{
-		resPkt.SetError(ERROR_CODE::ROOM_MGR_NUMBER_OVER_MAX);
-		m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_ENTER_RES, sizeof(PktRoomEnterRes), (char*)&resPkt);
-		return ERROR_CODE::ROOM_MGR_NUMBER_OVER_MAX;
-	}
+		return (SendError(packetInfo, resPkt, ERROR_CODE::ROOM_MGR_NUMBER_OVER_MAX, PACKET_ID::ROOM_ENTER_RES));
 
 	// 실행 : 방 입장
 	Room* pRoom = nullptr;
@@ -146,30 +124,18 @@ ERROR_CODE PacketProcess::EnterRoom(PacketInfo packetInfo)
 	{
 		pRoom = m_pRefRoomMgr->GetRandomRoom();
 		if (pRoom == nullptr)
-		{
-			resPkt.SetError(ERROR_CODE::ROOM_MGR_ENTER_ROOM_FAIL);
-			m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_ENTER_RES, sizeof(PktRoomEnterRes), (char*)&resPkt);
-			return ERROR_CODE::ROOM_MGR_ENTER_ROOM_FAIL;
-		}
+			return (SendError(packetInfo, resPkt, ERROR_CODE::ROOM_MGR_ENTER_ROOM_FAIL, PACKET_ID::ROOM_ENTER_RES));
 	}
 	else
 	{
 	    //방번호의 방 객체를 얻는다.
 		pRoom = m_pRefRoomMgr->GetRoom(reqPkt->RoomIndex);
 		if (pRoom == nullptr)
-		{
-			resPkt.SetError(ERROR_CODE::ROOM_MGR_ENTER_ROOM_FAIL);
-			m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_ENTER_RES, sizeof(PktRoomEnterRes), (char*)&resPkt);
-			return ERROR_CODE::ROOM_MGR_ENTER_ROOM_FAIL;
-		}
+			return (SendError(packetInfo, resPkt, ERROR_CODE::ROOM_MGR_ENTER_ROOM_FAIL, PACKET_ID::ROOM_ENTER_RES));
 
 	    //방에 들어간 인원이 이미 다 찬 상태이면 실패이다.
 		if (pRoom->IsFull() == true)
-		{
-			resPkt.SetError(ERROR_CODE::ROOM_MGR_ROOM_ALREADY_FULL);
-			m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_ENTER_RES, sizeof(PktRoomEnterRes), (char*)&resPkt);
-			return ERROR_CODE::ROOM_MGR_ROOM_ALREADY_FULL;
-		}
+			return (SendError(packetInfo, resPkt, ERROR_CODE::ROOM_MGR_ROOM_ALREADY_FULL, PACKET_ID::ROOM_ENTER_RES));
 	}
 	
 	// 위에서 성공한 경우
@@ -199,20 +165,13 @@ ERROR_CODE PacketProcess::LeaveRoom(PacketInfo packetInfo)
 	// 유저가 방에 들어온 상태가 맞는지 확인한다
 	auto pUser = std::get<User *>(m_pRefUserMgr->GetUser(packetInfo.SessionIndex));
 	if (pUser->GetRoomIndex() == -1)
-	{
-		resPkt.SetError(ERROR_CODE::USER_MGR_ALREADY_IN_ROOM);
-		m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_LEAVE_RES, sizeof(PktRoomLeaveRes), (char*)&resPkt);
-		return ERROR_CODE::UNASSIGNED_ERROR;
-	}
+		return (SendError(packetInfo, resPkt, ERROR_CODE::USER_MGR_ALREADY_IN_ROOM, PACKET_ID::ROOM_LEAVE_RES));
 
 	// 유저가 들어간 방의 객체를 가져온다
 	auto pRoom = m_pRefRoomMgr->GetRoom(pUser->GetRoomIndex());
 	if (pRoom == nullptr)
-	{
-		resPkt.SetError(ERROR_CODE::ROOM_MGR_NO_SUCH_ROOM);
-		m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_LEAVE_RES, sizeof(PktRoomLeaveRes), (char*)&resPkt);
-		return ERROR_CODE::ROOM_MGR_NO_SUCH_ROOM;
-	}
+		return (SendError(packetInfo, resPkt, ERROR_CODE::ROOM_MGR_NO_SUCH_ROOM, PACKET_ID::ROOM_LEAVE_RES));
+
 	// 방에서 유저를 빼고, 유저 상태도 변경한다.
 	pRoom->UserLeaveRoom(pUser->GetRoomIndex());
 	pUser->SetRoomIndex(-1);
@@ -221,9 +180,7 @@ ERROR_CODE PacketProcess::LeaveRoom(PacketInfo packetInfo)
 	if (pRoom->GetUserCount() != 0)
 		pRoom->BroadCastOtherLeave(pUser);
 
-	resPkt.SetError(ERROR_CODE::NONE);
-	m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_LEAVE_RES, sizeof(PktRoomLeaveRes), (char*)&resPkt);
-	return ERROR_CODE::NONE;
+	return (SendError(packetInfo, resPkt, ERROR_CODE::NONE, PACKET_ID::ROOM_LEAVE_RES));
 }
 
 //TODO: 방 채팅
@@ -237,27 +194,26 @@ ERROR_CODE PacketProcess::ChatRoom(PacketInfo packetInfo)
 	// 유저가 방에 들어온 상태가 맞는지 확인한다
 	auto pUser = std::get<User*>(m_pRefUserMgr->GetUser(packetInfo.SessionIndex));
 	if (pUser->GetRoomIndex() == -1)
-	{
-		resPkt.SetError(ERROR_CODE::USER_MGR_ALREADY_IN_ROOM);
-		m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_CHAT_RES, sizeof(PktRoomLeaveRes), (char*)&resPkt);
-		return ERROR_CODE::UNASSIGNED_ERROR;
-	}
+		return (SendError(packetInfo, resPkt, ERROR_CODE::USER_MGR_NOT_IN_ROOM, PACKET_ID::ROOM_CHAT_RES));
 
 	// 유저가 들어간 방의 객체를 가져온다
 	auto pRoom = m_pRefRoomMgr->GetRoom(pUser->GetRoomIndex());
 	if (pRoom == nullptr)
-	{
-		resPkt.SetError(ERROR_CODE::ROOM_MGR_NO_SUCH_ROOM);
-		m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_CHAT_RES, sizeof(PktRoomLeaveRes), (char*)&resPkt);
-		return ERROR_CODE::ROOM_MGR_NO_SUCH_ROOM;
-	}
+		return (SendError(packetInfo, resPkt, ERROR_CODE::ROOM_MGR_NO_SUCH_ROOM, PACKET_ID::ROOM_CHAT_RES));
 
 	// 채팅 메시지에 문제가 없다면 요청이 성공함을 알린다
 	std::string Msg;
 	Msg.assign(reqPkt->Msg, 0, reqPkt->Msglen);
 	pRoom->BroadCastOtherChat(pUser, Msg);
 
-	resPkt.SetError(ERROR_CODE::NONE);
-	this->m_pRefNetwork->SendData(packetInfo.SessionIndex, (short)PACKET_ID::ROOM_CHAT_RES, sizeof(PktRoomChatRes), (char*)&resPkt);
-	return ERROR_CODE::NONE;
+	return (SendError(packetInfo, resPkt, ERROR_CODE::NONE, PACKET_ID::ROOM_CHAT_RES));
+}
+
+// TODO: 
+
+ERROR_CODE PacketProcess::SendError(PacketInfo info, PktBase packet, ERROR_CODE err_code, PACKET_ID packetId)
+{
+	packet.SetError(err_code);
+	m_pRefNetwork->SendData(info.SessionIndex, (short)packetId, sizeof(packet), (char*)&packet);
+	return err_code;
 }
