@@ -52,6 +52,8 @@ private:
 	ERROR_CODE LeaveRoom(PacketInfo packetInfo);
 	ERROR_CODE ChatRoom(PacketInfo packetInfo);
 
+	ERROR_CODE PutStone(PacketInfo packetInfo);
+
 
 	ERROR_CODE SendError(PacketInfo info, PktBase packet, ERROR_CODE err_code, PACKET_ID packetId);
 };

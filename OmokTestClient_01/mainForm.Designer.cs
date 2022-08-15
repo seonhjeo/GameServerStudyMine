@@ -57,6 +57,7 @@
             this.btn_RoomEnter = new System.Windows.Forms.Button();
             this.textBoxRoomNumber = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.groupBox5.SuspendLayout();
             this.Room.SuspendLayout();
             this.SuspendLayout();
@@ -390,11 +391,21 @@
             this.label3.TabIndex = 43;
             this.label3.Text = "Room Number:";
             // 
+            // panel1
+            // 
+            this.panel1.Location = new System.Drawing.Point(536, 12);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(670, 670);
+            this.panel1.TabIndex = 48;
+            this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
+            this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
+            // 
             // mainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(524, 694);
+            this.ClientSize = new System.Drawing.Size(1218, 694);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.Room);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.textBoxUserPW);
@@ -411,7 +422,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "mainForm";
-            this.Text = "네트워크 테스트 클라이언트";
+            this.Text = "     ";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.mainForm_FormClosing);
             this.Load += new System.EventHandler(this.mainForm_Load);
             this.groupBox5.ResumeLayout(false);
@@ -454,6 +465,7 @@
         private System.Windows.Forms.ListBox listBoxRoomUserList;
         private System.Windows.Forms.Button btnRoomRelay;
         private System.Windows.Forms.TextBox textBoxRelay;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 

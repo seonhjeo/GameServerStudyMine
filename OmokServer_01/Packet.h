@@ -96,7 +96,23 @@ struct PktRoomChatNtf
 	short msgLen;
 	wchar_t Msg[MAX_ROOM_CHAT_MSG_SIZE] = { 0, };
 };
+
+// 게임 관련 패킷
+struct PktGameStoneReq
+{
+	int x;
+	int y;
+};
+
+struct PktGameStoneRes : PktBase
+{
+};
+
+struct PktGameStoneNtf
+{
+	long long uniqueId;
+	int x;
+	int y;
+};
 #pragma pack(pop)
 
-
-	

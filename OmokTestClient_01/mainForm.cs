@@ -30,10 +30,26 @@ namespace csharp_test_client
         // RecvPacketQueue를 주기적으로 읽으며 UI를 변경하는 타이머
         Timer dispatcherUITimer;
 
+        // 오목 게임판
+        Graphics g;
+        Pen pen;
+        Brush wBrush, bBrush;
+        int margin = 40;
+        int 눈Size = 30; // gridSize
+        int 돌Size = 28; // stoneSize
+        int 화점Size = 10; // flowerSize
+        Int16[,] board = new Int16[19, 19];
+
+        bool flag = false;
 
         public mainForm()
         {
             InitializeComponent();
+
+            // 오목 게임판
+            pen = new Pen(Color.Black);
+            bBrush = new SolidBrush(Color.Black);
+            wBrush = new SolidBrush(Color.White);
         }
 
         private void mainForm_Load(object sender, EventArgs e)
@@ -373,6 +389,150 @@ namespace csharp_test_client
             PostSendPacket(PACKET_ID.ROOM_CHAT_REQ, requestPkt.ToBytes());
             DevLog.Write($"방 채팅 요청");
         }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+            DrawBoard();
+            drawAllStones();
+        }
+
+        private void DrawBoard()
+        {
+            // panel1에 Graphics 객체 생성
+            g = panel1.CreateGraphics();
+            SolidBrush blueBrush = new SolidBrush(Color.Orange);
+
+            // Create rectangle for region.
+            Rectangle fillRect = new Rectangle(0, 0, 2 * margin + 18 * 눈Size, 2 * margin + 18 * 눈Size);
+
+            // Create region for fill.
+            Region fillRegion = new Region(fillRect);
+
+            // Fill region to screen.
+            g.FillRegion(blueBrush, fillRegion);
+            // 세로선 19개
+            for (int i = 0; i < 19; i++)
+            {
+                g.DrawLine(pen, new Point(margin + i * 눈Size, margin),
+                  new Point(margin + i * 눈Size, margin + 18 * 눈Size));
+            }
+
+            // 가로선 19개
+            for (int i = 0; i < 19; i++)
+            {
+                g.DrawLine(pen, new Point(margin, margin + i * 눈Size),
+                  new Point(margin + 18 * 눈Size, margin + i * 눈Size));
+            }
+
+            // 화점그리기
+            for (int x = 3; x <= 15; x += 6)
+                for (int y = 3; y <= 15; y += 6)
+                {
+                    g.FillEllipse(bBrush,
+                      margin + 눈Size * x - 화점Size / 2,
+                      margin + 눈Size * y - 화점Size / 2,
+                      화점Size, 화점Size);
+                }
+        }
+
+        private void drawAllStones()
+        {
+            for (Int16 x = 0; x < 19; x++)
+            {
+                for (Int16 y = 0; y < 19; y++)
+                {
+                    if (board[x, y] == 0)
+                    {
+                        continue;
+                    }
+                    Rectangle r = new Rectangle(
+                      margin + 눈Size * x - 돌Size / 2,
+                      margin + 눈Size * y - 돌Size / 2,
+                      돌Size, 돌Size);
+                    if (board[x, y] == 1)
+                    {
+                        g.FillEllipse(wBrush, r);
+                    }
+                    else if (board[x, y] == 2)
+                    {
+                        g.FillEllipse(bBrush, r);
+                    }
+                }
+            }
+        }
+
+        private void placeStoneAt(Int32 x, Int32 y, bool color)
+        {
+            Rectangle r = new Rectangle(
+              margin + 눈Size * x - 돌Size / 2,
+              margin + 눈Size * y - 돌Size / 2,
+              돌Size, 돌Size);
+            if (color == true)
+            {
+                board[x, y] = 1;
+            }
+            else
+            {
+                board[x, y] = 2;
+            }
+            if (color == false)
+            {
+                g.FillEllipse(bBrush, r);
+                //flag = true;
+                //바둑판[x, y] = STONE.black;
+            }
+            else
+            {
+                g.FillEllipse(wBrush, r);
+                //flag = false;
+                //바둑판[x, y] = STONE.white;
+            }
+        }
+
+        private void panel1_MouseDown(object sender, MouseEventArgs e)
+        {
+            // e.X는 픽셀단위, x는 바둑판 좌표
+            Int32 x = (e.X - margin + 눈Size / 2) / 눈Size;
+            Int32 y = (e.Y - margin + 눈Size / 2) / 눈Size;
+
+            // 바둑판을 넘어가면 아무것도 누르지않음
+            if (x < 0 || y < 0 || x > 18 || y > 18)
+                return;
+
+            // 바둑판[x,y] 에 돌을 그린다
+            Rectangle r = new Rectangle(
+              margin + 눈Size * x - 돌Size / 2,
+              margin + 눈Size * y - 돌Size / 2,
+              돌Size, 돌Size);
+
+            // 검은돌 차례
+            if (flag == false)
+            {
+                g.FillEllipse(bBrush, r);
+                flag = true;
+                board[x, y] = 1;
+            }
+            else
+            {
+                g.FillEllipse(wBrush, r);
+                flag = false;
+                board[x, y] = 2;
+            }
+
+            // 해당 좌표를 클릭한다 -> 서버에 그 좌표를 보낸다 -> 서버가 그 좌표에 찍어도 된다고 하면 찍는다.
+            // 클라단에서 특정 위치가 되는지 안되는지에 대한 정보를 가지고 있을 필요는 없다.
+            // 서버가 보낼 패킷의 정보에는 좌표, 색의 위치를 Ntf로 보낸다.
+            // 그렇다면, panel1_MouseDown에서는 좌표 정보를 서버로 보내는 함수가 되고, 그리는 함수는 따로 패킷처리 하는 함수 만들어야 한다.
+            //
+            // 서버 쪽에 좌표를 보내는 코드.
+
+            //var requestPkt = new PlacingStoneReqPacket();
+            //requestPkt.SetValue(x, y);
+
+            //PostSendPacket(PACKET_ID.OMOK_PLACE_STONE_REQ, requestPkt.ToBytes());
+            //DevLog.Write($"돌 놓기 요청");
+        }
+
 
         private void btnRoomRelay_Click(object sender, EventArgs e)
         {

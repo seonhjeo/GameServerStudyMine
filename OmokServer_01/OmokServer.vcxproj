@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetLib\TcpNetwork.cpp" />
     <ClCompile Include="PacketProcess.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="conmanip.h" />
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="ErrorCode.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="NetLib\Define.h" />
     <ClInclude Include="NetLib\ILog.h" />
     <ClInclude Include="NetLib\ITcpNetwork.h" />

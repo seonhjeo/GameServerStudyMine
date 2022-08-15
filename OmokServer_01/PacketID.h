@@ -20,6 +20,10 @@ enum class PACKET_ID : short
 	ROOM_CHAT_RES = 77,
 	ROOM_CHAT_NTF = 78,
 
+	GAME_STONE_REQ = 86,
+	GAME_STONE_RES = 87,
+	GAME_STONE_NTF = 88,
+
 	MAX = 256
 };
 

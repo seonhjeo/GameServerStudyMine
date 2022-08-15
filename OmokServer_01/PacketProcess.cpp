@@ -59,6 +59,8 @@ void PacketProcess::Process(PacketInfo packetInfo)
 	case (int)commonPacketId::ROOM_CHAT_REQ:
 		ChatRoom(packetInfo);
 		break;
+	case (int)commonPacketId::GAME_STONE_REQ:
+		PutStone(packetInfo);
 	}
 }
 
@@ -209,7 +211,12 @@ ERROR_CODE PacketProcess::ChatRoom(PacketInfo packetInfo)
 	return (SendError(packetInfo, resPkt, ERROR_CODE::NONE, PACKET_ID::ROOM_CHAT_RES));
 }
 
-// TODO: 
+// TODO : 돌 놓기
+ERROR_CODE PacketProcess::PutStone(PacketInfo packetInfo)
+{
+	// ERR_NONE을 제외한 모든 오류 코드 전송시 판을 리셋하게끔 전송
+	// 해당 방에 2명이 아니면 ERR_ROOM_MGR_USER_NOT_FULL
+}
 
 ERROR_CODE PacketProcess::SendError(PacketInfo info, PktBase packet, ERROR_CODE err_code, PACKET_ID packetId)
 {
