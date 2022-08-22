@@ -15,12 +15,14 @@ Room::Room() {}
 
 Room::~Room()
 {
+	delete(m_pGame);
 }
 	
 void Room::Init(const short index, const short maxUserCount)
 {
 	m_Index = index;
 	m_MaxUserCount = maxUserCount;
+	m_pGame = new Game();
 }
 
 void Room::SetNetwork(TcpNet* pNetwork, ILog* pLogger)

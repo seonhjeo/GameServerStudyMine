@@ -82,8 +82,6 @@ ERROR_CODE PacketProcess::NtfSysCloseSession(PacketInfo packetInfo)
 	return ERROR_CODE::NONE;
 }
 
-
-
 ERROR_CODE PacketProcess::Login(PacketInfo packetInfo)
 {
 	m_pRefLogger->Write(LOG_TYPE::L_INFO, "%s | NtfSysConnctSession. sessionIndex(%d)", __FUNCTION__, packetInfo.SessionIndex);
@@ -211,11 +209,40 @@ ERROR_CODE PacketProcess::ChatRoom(PacketInfo packetInfo)
 	return (SendError(packetInfo, resPkt, ERROR_CODE::NONE, PACKET_ID::ROOM_CHAT_RES));
 }
 
+// TODO : 게임 시작 및 종료
+ERROR_CODE PacketProcess::StartGame(PacketInfo packetInfo)
+{
+	// 해당 방에 2명이 아니면 ERR_ROOM_MGR_USER_NOT_FULL
+	return ERROR_CODE::NONE;
+}
+
+ERROR_CODE PacketProcess::FinishGame(PacketInfo packetInfo)
+{
+	return ERROR_CODE::NONE;
+}
+
 // TODO : 돌 놓기
 ERROR_CODE PacketProcess::PutStone(PacketInfo packetInfo)
 {
-	// ERR_NONE을 제외한 모든 오류 코드 전송시 판을 리셋하게끔 전송
-	// 해당 방에 2명이 아니면 ERR_ROOM_MGR_USER_NOT_FULL
+	m_pRefLogger->Write(LOG_TYPE::L_INFO, "%s | NtfSysConnctSession. sessionIndex(%d)", __FUNCTION__, packetInfo.SessionIndex);
+
+	PktGameStoneRes resPkt;
+	auto reqPkt = (PktGameStoneReq*)packetInfo.pRefData;
+
+	auto pUser = std::get<User*>(m_pRefUserMgr->GetUser(packetInfo.SessionIndex));
+	auto pRoom = m_pRefRoomMgr->GetRoom(pUser->GetRoomIndex());
+	auto pGame = pRoom->GetGame();
+
+	ERROR_CODE resCode = pGame->PutStone(reqPkt->x, reqPkt->y, pUser->GetRoomIndex());
+	if (resCode == ERROR_CODE::GAME_MGR_PLAYER_WIN)
+	{
+		std::string Msg = "Player " + pGame->GetNowPlayer();
+		Msg += " Win!";
+		pRoom->BroadCastOtherChat(pUser, Msg);
+		return ERROR_CODE::NONE;
+	}
+	else
+		return SendError(packetInfo, resPkt, resCode, PACKET_ID::GAME_STONE_RES);
 }
 
 ERROR_CODE PacketProcess::SendError(PacketInfo info, PktBase packet, ERROR_CODE err_code, PACKET_ID packetId)

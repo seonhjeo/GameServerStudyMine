@@ -11,6 +11,7 @@ Game::~Game()
 
 void Game::Init()
 {
+    m_gameStarted = false;
     m_nowPlayer = 0;
     for (int i = 0; i < MAX_N; i++)
         for (int j = 0; j < MAX_N; j++)
@@ -20,15 +21,26 @@ void Game::Init()
 ERROR_CODE Game::PutStone(int x, int y, int user)
 {
     // TODO
+    // 게임이 시작상태가 아니면 ERR_GAME_NOT_STARTED
+    if (m_gameStarted == false)
+        return ERROR_CODE::GAME_MGR_GAME_NOT_STARTED;
     // user이 m_nowPlayer이랑 맞지 않으면 ERR_GAME_NOT_PLAYERS_TURN
+    if (user != m_nowPlayer)
+        return ERROR_CODE::GAME_MGR_NOT_PLAYERS_TURN;
     // 놓을 자리가 바운드를 넘겼으면 ERR_GAME_BOUND_OVER
+    if (IsOverBound(x, y))
+        return ERROR_CODE::GAME_MGR_BOARD_BOUND_OVER;
     // 놓을 자리에 이미 놓여져 있으면 ERR_ALREADY_STONE_EXIST
+    if (m_board[y][x] != -1)
+        return ERROR_CODE::GAME_MGR_ALREADY_STONE_EXIST;
+
     // 돌 놓기
+    m_board[y][x] = user;
 
     if (IsWin())
-    {
-        // TODO : 승자가 누구인지 패킷 보내기
-    }
+        return ERROR_CODE::GAME_MGR_PLAYER_WIN;
+ 
+    return ERROR_CODE::NONE;
 }
 
 bool Game::IsOverBound(int x, int y)
@@ -38,7 +50,7 @@ bool Game::IsOverBound(int x, int y)
     return false;
 }
 
-bool Game::IsWin()
+const bool Game::IsWin()
 {
     // | 오목
     for (int i = 0; i < MAX_N - 4; i++)
@@ -89,4 +101,16 @@ bool Game::IsWin()
         }
     }
     return false;
+}
+
+ERROR_CODE Game::StartGame()
+{
+    m_gameStarted = true;
+    return ERROR_CODE::NONE;
+}
+ERROR_CODE Game::FinishGame()
+{
+    m_gameStarted = false;
+    Init();
+    return ERROR_CODE::NONE;
 }

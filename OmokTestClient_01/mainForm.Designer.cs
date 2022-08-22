@@ -58,6 +58,7 @@
             this.textBoxRoomNumber = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.button3 = new System.Windows.Forms.Button();
             this.groupBox5.SuspendLayout();
             this.Room.SuspendLayout();
             this.SuspendLayout();
@@ -400,11 +401,23 @@
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
             // 
+            // button3
+            // 
+            this.button3.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.button3.Location = new System.Drawing.Point(422, 89);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(87, 31);
+            this.button3.TabIndex = 49;
+            this.button3.Text = "게임 시작";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.btnGameStart_Click);
+            // 
             // mainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1218, 694);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.Room);
             this.Controls.Add(this.button2);
@@ -466,6 +479,7 @@
         private System.Windows.Forms.Button btnRoomRelay;
         private System.Windows.Forms.TextBox textBoxRelay;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Button button3;
     }
 }
 

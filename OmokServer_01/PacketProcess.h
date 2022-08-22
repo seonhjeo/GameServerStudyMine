@@ -52,6 +52,9 @@ private:
 	ERROR_CODE LeaveRoom(PacketInfo packetInfo);
 	ERROR_CODE ChatRoom(PacketInfo packetInfo);
 
+	ERROR_CODE StartGame(PacketInfo packetInfo);
+	ERROR_CODE FinishGame(PacketInfo packetInfo);
+
 	ERROR_CODE PutStone(PacketInfo packetInfo);
 
 

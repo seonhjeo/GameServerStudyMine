@@ -264,4 +264,71 @@ namespace csharp_test_client
         }
 
     }
+
+    public class GameStartReqPacket
+    {
+
+    }
+
+    public class GameStartResPacket
+    {
+
+    }
+
+    public class GameStartNtfPacket
+    { }
+
+
+    public class GamePutStoneReqPacket
+    {
+        public Int32 X;
+        public Int32 Y;
+
+        public void SetValue(Int32 x, Int32 y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public byte[] ToBytes()
+        {
+            List<byte> dataSource = new List<byte>();
+            dataSource.AddRange(BitConverter.GetBytes(X));
+            dataSource.AddRange(BitConverter.GetBytes(Y));
+            return dataSource.ToArray();
+        }
+    }
+
+    public class GamePutStoneResPacket
+    {
+        // 얘는 그냥 알이 어떻게 놓아졌는지 알려주는 함수.
+        // 놓아야할 바둑알은 Ntf함수를 통해서 한번에 알려준다.
+        public Int16 Result;
+
+        public bool FromBytes(byte[] bodyData)
+        {
+            Result = BitConverter.ToInt16(bodyData, 0);
+            return true;
+        }
+    }
+
+    public class GamePutStoneNtfPakcet
+    {
+        public Int32 X;
+        public Int32 Y;
+        public bool color;
+
+        public bool FromBytes(byte[] bodyData)
+        {
+            var readPos = 0;
+
+            X = BitConverter.ToInt32(bodyData, readPos);
+            readPos += 4;
+            Y = BitConverter.ToInt32(bodyData, readPos);
+            readPos += 4;
+            color = BitConverter.ToBoolean(bodyData, readPos);
+
+            return true;
+        }
+    }
 }

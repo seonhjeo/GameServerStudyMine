@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "User.h"
+#include "Game.h"
 
 
 namespace NServerNetLib { class ITcpNetwork; }
@@ -49,8 +50,7 @@ public:
 	void BroadCastOtherLeave(User* other);
 	void BroadCastOtherChat(User* other, std::string msg);
 	void GetListOtherUser(User* other);
-
-		
+	Game* GetGame() { return m_pGame; }
 
 private:
 	ILog* m_pRefLogger;
@@ -62,6 +62,5 @@ private:
 	bool m_IsUsed = false;
 	std::vector<User*> m_UserList;
 
-	// 룸에서 실행할 게임 오브젝트
-	// Game* m_pGame = nullptr;
+	Game* m_pGame = nullptr;
 };

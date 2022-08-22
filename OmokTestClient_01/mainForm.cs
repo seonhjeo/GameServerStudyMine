@@ -31,6 +31,8 @@ namespace csharp_test_client
         Timer dispatcherUITimer;
 
         // 오목 게임판
+        //bool isGaming = false;
+
         Graphics g;
         Pen pen;
         Brush wBrush, bBrush;
@@ -506,7 +508,7 @@ namespace csharp_test_client
               돌Size, 돌Size);
 
             // 검은돌 차례
-            if (flag == false)
+            /*if (flag == false)
             {
                 g.FillEllipse(bBrush, r);
                 flag = true;
@@ -517,7 +519,7 @@ namespace csharp_test_client
                 g.FillEllipse(wBrush, r);
                 flag = false;
                 board[x, y] = 2;
-            }
+            }*/
 
             // 해당 좌표를 클릭한다 -> 서버에 그 좌표를 보낸다 -> 서버가 그 좌표에 찍어도 된다고 하면 찍는다.
             // 클라단에서 특정 위치가 되는지 안되는지에 대한 정보를 가지고 있을 필요는 없다.
@@ -526,11 +528,11 @@ namespace csharp_test_client
             //
             // 서버 쪽에 좌표를 보내는 코드.
 
-            //var requestPkt = new PlacingStoneReqPacket();
-            //requestPkt.SetValue(x, y);
+            var requestPkt = new GamePutStoneReqPacket();
+            requestPkt.SetValue(x, y);
 
-            //PostSendPacket(PACKET_ID.OMOK_PLACE_STONE_REQ, requestPkt.ToBytes());
-            //DevLog.Write($"돌 놓기 요청");
+            PostSendPacket(PACKET_ID.GAME_STONE_REQ, requestPkt.ToBytes());
+            DevLog.Write($"돌 놓기 요청");
         }
 
 
@@ -545,6 +547,11 @@ namespace csharp_test_client
             //var bodyData = Encoding.UTF8.GetBytes(textBoxRelay.Text);
             //PostSendPacket(PACKET_ID.PACKET_ID_ROOM_RELAY_REQ, bodyData);
             //DevLog.Write($"방 릴레이 요청");
-        }       
+        }
+        
+        private void btnGameStart_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

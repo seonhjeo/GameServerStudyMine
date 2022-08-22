@@ -45,7 +45,9 @@ namespace csharp_test_client
         ROOM_CHAT_RES = 77,
         ROOM_CHAT_NOTIFY = 78,
 
-
+        GAME_STONE_REQ = 86,
+        GAME_STONE_RES = 87,
+        GAME_STONE_NTF = 88
 
         //PACKET_ID_ERROR_NTF = 703,
 

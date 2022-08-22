@@ -23,6 +23,8 @@ namespace csharp_test_client
             PacketFuncDic.Add(PACKET_ID.ROOM_LEAVE_USER_NTF, PacketProcess_RoomLeaveUserNotify);
             PacketFuncDic.Add(PACKET_ID.ROOM_CHAT_RES, PacketProcess_RoomChatResponse);            
             PacketFuncDic.Add(PACKET_ID.ROOM_CHAT_NOTIFY, PacketProcess_RoomChatNotify);
+            PacketFuncDic.Add(PACKET_ID.GAME_STONE_RES, PacketProcess_GameStoneResponse);
+            PacketFuncDic.Add(PACKET_ID.GAME_STONE_NTF, PacketProcess_GameStoneNotify);
             //PacketFuncDic.Add(PACKET_ID.PACKET_ID_ROOM_RELAY_NTF, PacketProcess_RoomRelayNotify);
         }
 
@@ -135,6 +137,31 @@ namespace csharp_test_client
             responsePkt.FromBytes(bodyData);
 
             AddRoomChatMessageList(responsePkt.UserUniqueId, responsePkt.Message);
+        }
+
+        void PacketProcess_GameStoneResponse(byte[] bodyData)
+        {
+            var responsePkt = new GamePutStoneResPacket();
+            responsePkt.FromBytes(bodyData);
+
+            var errorCode = (ERROR_CODE)responsePkt.Result;
+            var msg = $"오목 돌 놓기 결과:  {(ERROR_CODE)responsePkt.Result}";
+            if (errorCode == ERROR_CODE.ERROR_NONE)
+            {
+                DevLog.Write(msg, LOG_LEVEL.ERROR);
+            }
+            else
+            {
+
+            }
+        }
+
+        void PacketProcess_GameStoneNotify(byte[] bodyData)
+        {
+            var responsePkt = new GamePutStoneNtfPakcet();
+            responsePkt.FromBytes(bodyData);
+
+            placeStoneAt(responsePkt.X, responsePkt.Y, responsePkt.color);
         }
 
         void AddRoomChatMessageList(Int64 userUniqueId, string msgssage)

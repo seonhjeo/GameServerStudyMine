@@ -98,6 +98,32 @@ struct PktRoomChatNtf
 };
 
 // 게임 관련 패킷
+struct PktGameStartReq
+{
+};
+
+struct PktGameStartRes : PktBase
+{
+	long long UniqueId;
+};
+
+struct PktGameStartNtf
+{
+};
+
+struct PktGameFinishReq
+{
+};
+
+struct PktGameFinishRes : PktBase
+{
+	long long UniqueId;
+};
+
+struct PktGameFinishNtf
+{
+};
+
 struct PktGameStoneReq
 {
 	int x;
@@ -110,9 +136,9 @@ struct PktGameStoneRes : PktBase
 
 struct PktGameStoneNtf
 {
-	long long uniqueId;
 	int x;
 	int y;
+	bool color;
 };
 #pragma pack(pop)
 
