@@ -469,14 +469,12 @@ namespace csharp_test_client
               margin + 눈Size * x - 돌Size / 2,
               margin + 눈Size * y - 돌Size / 2,
               돌Size, 돌Size);
-            if (color == true)
-            {
+
+            if (color == false)
                 board[x, y] = 1;
-            }
             else
-            {
                 board[x, y] = 2;
-            }
+
             if (color == false)
             {
                 g.FillEllipse(bBrush, r);

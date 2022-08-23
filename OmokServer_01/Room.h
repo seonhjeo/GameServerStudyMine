@@ -50,6 +50,8 @@ public:
 	void BroadCastOtherLeave(User* other);
 	void BroadCastOtherChat(User* other, std::string msg);
 	void GetListOtherUser(User* other);
+	void BroadCastPutStone(User* other, int x, int y, int user, ERROR_CODE code);
+
 	Game* GetGame() { return m_pGame; }
 
 private:

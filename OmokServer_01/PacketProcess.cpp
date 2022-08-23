@@ -1,4 +1,5 @@
 ﻿#include <cstring>
+#include <iostream>
 
 #include "NetLib/ILog.h"
 #include "NetLib/TcpNetwork.h"
@@ -6,6 +7,7 @@
 #include "User.h"
 #include "UserManager.h"
 #include "Room.h"
+#include "Game.h"
 #include "RoomManager.h"
 #include "PacketProcess.h"
 
@@ -74,6 +76,7 @@ ERROR_CODE PacketProcess::NtfSysConnctSession(PacketInfo packetInfo)
 ERROR_CODE PacketProcess::NtfSysCloseSession(PacketInfo packetInfo)
 {
 	auto pUser = std::get<1>(m_pRefUserMgr->GetUser(packetInfo.SessionIndex));
+	LeaveRoom(packetInfo);
 
 	if (pUser)
 		m_pRefUserMgr->RemoveUser(packetInfo.SessionIndex);		
@@ -231,9 +234,16 @@ ERROR_CODE PacketProcess::PutStone(PacketInfo packetInfo)
 
 	auto pUser = std::get<User*>(m_pRefUserMgr->GetUser(packetInfo.SessionIndex));
 	auto pRoom = m_pRefRoomMgr->GetRoom(pUser->GetRoomIndex());
-	auto pGame = pRoom->GetGame();
 
+	if (pRoom == nullptr)
+		return SendError(packetInfo, resPkt, ERROR_CODE::USER_MGR_NOT_IN_ROOM, PACKET_ID::GAME_STONE_RES);
+	if (pRoom->GetUserCount() < pRoom->MaxUserCount())
+		return SendError(packetInfo, resPkt, ERROR_CODE::USER_MGR_NOT_IN_ROOM, PACKET_ID::GAME_STONE_RES);
+
+	auto pGame = pRoom->GetGame();
 	ERROR_CODE resCode = pGame->PutStone(reqPkt->x, reqPkt->y, pUser->GetRoomIndex());
+	pRoom->BroadCastPutStone(pUser, reqPkt->x, reqPkt->y, pUser->GetRoomIndex(), resCode);
+
 	if (resCode == ERROR_CODE::GAME_MGR_PLAYER_WIN)
 	{
 		std::string Msg = "Player " + pGame->GetNowPlayer();

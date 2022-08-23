@@ -124,3 +124,18 @@ void Room::BroadCastOtherChat(User* other, std::string msg)
 	for (User* element : m_UserList)
 		m_pRefNetwork->SendData(element->GetSessionIndex(), (short)PACKET_ID::ROOM_CHAT_NTF, sizeof(PktRoomChatNtf), (char*)&pktRes);
 }
+
+void Room::BroadCastPutStone(User* other, int x, int y, int user, ERROR_CODE code)
+{
+	if (code == ERROR_CODE::GAME_MGR_PLAYER_WIN || code == ERROR_CODE::NONE)
+	{
+		PktGameStoneNtf pktRes;
+
+		pktRes.x = x;
+		pktRes.y = y;
+		pktRes.color = (bool)user;
+
+		for (User* element : m_UserList)
+			m_pRefNetwork->SendData(element->GetSessionIndex(), (short)PACKET_ID::GAME_STONE_NTF, sizeof(PktGameStoneNtf), (char*)&pktRes);
+	}
+}
