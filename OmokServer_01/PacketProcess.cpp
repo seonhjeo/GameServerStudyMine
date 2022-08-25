@@ -241,8 +241,9 @@ ERROR_CODE PacketProcess::PutStone(PacketInfo packetInfo)
 		return SendError(packetInfo, resPkt, ERROR_CODE::USER_MGR_NOT_IN_ROOM, PACKET_ID::GAME_STONE_RES);
 
 	auto pGame = pRoom->GetGame();
-	ERROR_CODE resCode = pGame->PutStone(reqPkt->x, reqPkt->y, pUser->GetRoomIndex());
-	pRoom->BroadCastPutStone(pUser, reqPkt->x, reqPkt->y, pUser->GetRoomIndex(), resCode);
+	ERROR_CODE resCode = pGame->PutStone(reqPkt->x, reqPkt->y, pUser->GetSessionIndex());
+	pRoom->BroadCastPutStone(pUser, reqPkt->x, reqPkt->y, pUser->GetSessionIndex(), resCode);
+	m_pRefLogger->Write(LOG_TYPE::L_INFO, "error code : %d", resCode);
 
 	if (resCode == ERROR_CODE::GAME_MGR_PLAYER_WIN)
 	{

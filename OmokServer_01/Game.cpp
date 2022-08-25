@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <iostream>
 
 Game::Game()
 {
@@ -20,6 +21,7 @@ void Game::Init()
 
 ERROR_CODE Game::PutStone(int x, int y, int user)
 {
+    std::cout << x << " " << y << " " << user << " " << m_nowPlayer << std::endl;
     // TODO
     // 게임이 시작상태가 아니면 ERR_GAME_NOT_STARTED
     //if (m_gameStarted == false)
@@ -41,7 +43,11 @@ ERROR_CODE Game::PutStone(int x, int y, int user)
     m_board[y][x] = user;
     if (IsWin())
         return ERROR_CODE::GAME_MGR_PLAYER_WIN;
-    m_nowPlayer = user == 0 ? 1 : 0;
+
+    if (m_nowPlayer == 0)
+        m_nowPlayer = 1;
+    else
+        m_nowPlayer = 0;
 
     return ERROR_CODE::NONE;
 }

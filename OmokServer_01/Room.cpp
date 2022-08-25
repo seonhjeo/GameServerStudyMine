@@ -133,7 +133,7 @@ void Room::BroadCastPutStone(User* other, int x, int y, int user, ERROR_CODE cod
 
 		pktRes.x = x;
 		pktRes.y = y;
-		pktRes.color = (bool)user;
+		pktRes.color = user == 0 ? false : true;
 
 		for (User* element : m_UserList)
 			m_pRefNetwork->SendData(element->GetSessionIndex(), (short)PACKET_ID::GAME_STONE_NTF, sizeof(PktGameStoneNtf), (char*)&pktRes);

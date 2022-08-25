@@ -161,6 +161,7 @@ namespace csharp_test_client
             var responsePkt = new GamePutStoneNtfPakcet();
             responsePkt.FromBytes(bodyData);
 
+            DevLog.Write($"{responsePkt.X} {responsePkt.Y} {responsePkt.color}");
             placeStoneAt(responsePkt.X, responsePkt.Y, responsePkt.color);
         }
 
